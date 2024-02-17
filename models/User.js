@@ -19,4 +19,4 @@ const UserSchema = new Schema({         //read about models
         required: true
     }
 });
- module.exports = mongoose.model('user', UserSchema)     //whenever it is used, user named collection will be created inside your db                                     
+ module.exports = mongoose.model('User', UserSchema)     //whenever it is used, user named collection will be created inside your db                                     

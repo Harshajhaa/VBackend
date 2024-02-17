@@ -1,48 +1,92 @@
-// const express = require('express');
-// const router = express.Router();
-// const User = require('../models/User');
-// // const { body, validationResult } = require('express-validator');
-// // const bcrypt = require("bcryptjs")
-// // const jwt = require("jsonwebtoken")
-// // const jwtSecret = "MynameisEndtoEndYouTubeChannel1$#"
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+const { body, validationResult } = require('express-validator');
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+// const jwtSecret = "ShivNandHarshTiyaShubhRuchAnja1$#"
+const dotenv = require("dotenv");
+dotenv.config();
 
-// router.post(
-//   "/register",
+router.post(
+    "/register",
 
-//   // [
-//   //   body('email').isEmail(),
-//   //   body('password').isLength({ min: 5 }).withMessage('Invalid Password')
-//   // ],
- 
-//   async (req, res) => {
-//     console.log(req.body.fullname);
-//     console.log(req.body.email);
-//     console.log(req.body.password);
-//     console.log(req.body.confirmpassword);
-//     try {
-//         // if(req.body.password!==req.body.confirmpassword)
-//         // {
-//         //     return res.json({ success: false });
-//         // }
-//       //   let userData = await User.findOne({email:req.body.email});
-//       // if(!userData){
-//       //   return res.json({ success: false,errors: "email already exists"})
-//       // }
-//        console.log("hello")
+    async (req, res) => {
+        const password = req.body.password
+        const confirmpassword = req.body.confirmpassword
+        const email = req.body.email
+        const fullname = req.body.fullname
+        try {
+            if (fullname.length < 5) {
+                return res.json({ success: false, error: "min length of name should be 5" });
+            }
+            let userData = await User.findOne({ email });
+            if (userData) {
+                return res.json({ success: false, error: "email already exists" })
+            }
+            if (password.length < 5) {
+                return res.json({ success: false, error: "min length of password should be 5" });
+            }
+            if (password !== confirmpassword) {
+                return res.json({ success: false, error: "Password and confirm Password should be same" });
+            }
 
-//       await User.create({
-//         fullname: req.body.fullname,
-//         email: req.body.email,
-//         password: req.body.password,
-//         confirmpassword: req.body.confirmpassword
-//       });
-//       console.log("success");
-//        res.json({ success: true });
-//     } catch (error) {
-//       console.log(error);
-//       res.json({ success: false ,error:"error"});
-//     }
-//   }
-// );
+            const salt = await bcrypt.genSalt(10);
+            let secPassword = await bcrypt.hash(req.body.password, salt);
 
-// module.exports = router;
+            await User.create({
+                fullname: req.body.fullname,
+                email: req.body.email,
+                password: secPassword,
+                confirmpassword: req.body.confirmpassword
+            });
+            console.log("success");
+            res.json({ success: true });
+        } catch (error) {
+            console.log(error);
+            res.json({ success: false, error: "error" });
+        }
+    }
+);
+
+
+router.post(
+    '/login',
+
+    async (req, res) => {
+
+        // const errors = validationResult(req);
+        // if (!errors.isEmpty()) {
+        //   return res.status(400).json({ errors: errors.array() });
+        // }
+    
+        let email = req.body.email;
+        try {
+          let userData = await User.findOne({email});
+          if(!userData){
+            return res.status(400).json({ success: false, error: "email doesn't exist"})
+          }
+    
+          const pwdCompare = await bcrypt.compare(req.body.password, userData.password)
+        
+          if(!pwdCompare){
+            return res.status(400).json({success: false, error: "incorrect password"})
+          }
+    
+          const data = {
+              user:{
+                id:userData.id
+              }
+          }
+          const authToken = jwt.sign(data, process.env.jwtSecret)
+           return res.json({ success: true, authToken: authToken})
+       
+    
+        } catch (error) {
+          console.log(error);
+          res.json({ success: false ,error:"error occured! Try again"});
+        }
+      } 
+)
+
+module.exports = router;
