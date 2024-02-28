@@ -16,13 +16,25 @@ router.post(
         const confirmpassword = req.body.confirmpassword
         const email = req.body.email
         const fullname = req.body.fullname
+        const collegename = req.body.collegename
+        const rollnumber = req.body.rollnumber
+        const phonenumber = req.body.phonenumber
         try {
             if (fullname.length < 5) {
-                return res.json({ success: false, error: "min length of name should be 5" });
+                return res.json({ success: false, error: "Min length of name should be 5" });
             }
             let userData = await User.findOne({ email });
             if (userData) {
-                return res.json({ success: false, error: "email already exists" })
+                return res.json({ success: false, error: "Email already exists" })
+            }
+            if(!(phonenumber.length===10)){
+                return res.json({ success: false, error: "Enter valid phone number" })
+            }
+            if(collegename.length < 1){
+                return res.json({ success: false, error: "Enter college name" })
+            }
+            if(rollnumber.length < 1){
+                return res.json({ success: false, error: "Enter roll no." })
             }
             if (password.length < 5) {
                 return res.json({ success: false, error: "min length of password should be 5" });
@@ -37,8 +49,10 @@ router.post(
             await User.create({
                 fullname: req.body.fullname,
                 email: req.body.email,
+                phonenumber: req.body.phonenumber,
+                collegename: req.body.collegename,
+                rollnumber: req.body.rollnumber,
                 password: secPassword,
-                confirmpassword: req.body.confirmpassword
             });
             console.log("success");
             res.json({ success: true });

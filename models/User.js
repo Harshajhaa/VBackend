@@ -5,16 +5,23 @@ const UserSchema = new Schema({         //read about models
         type: String,
         required: true
     },
-    
     email:{
         type: String,
         required: true,
     },
-    password:{
+    phonenumber:{
         type: String,
         required: true
     },
-    confirmpassword:{
+    collegename:{
+        type: String,
+        required: true
+    },
+    rollnumber:{
+        type: String,
+        required: true
+    },
+    password:{
         type: String,
         required: true
     }
